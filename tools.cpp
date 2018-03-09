@@ -124,9 +124,9 @@ void print_attributes(const Attributes& attributes)
     }
 }
 
-std::pair<int, std::shared_ptr<unsigned char>> read_bignum(void* ssl_bignum)
+std::pair<int, std::shared_ptr<unsigned char>> read_bignum(const void* ssl_bignum)
 {
-    BIGNUM *b = reinterpret_cast<BIGNUM*>(ssl_bignum);
+    const BIGNUM *b = reinterpret_cast<const BIGNUM*>(ssl_bignum);
     
     int size = BN_num_bytes(b);
     assert(size > 0);

@@ -100,12 +100,17 @@ Attributes rsa_public_key_t::operator()(descriptor_p desc, const Attributes& att
     if (EVP_PKEY *pkey = PEM_read_PUBKEY(desc->file.get(), NULL, NULL, NULL)) {
         int size = 0;
         std::shared_ptr<unsigned char> buf;
+
+        RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+        const BIGNUM *n = NULL, *e = NULL;
+
+        RSA_get0_key(rsa, &n, &e, NULL);
         
-        std::tie(size, buf) = read_bignum(pkey->pkey.rsa->n);
+        std::tie(size, buf) = read_bignum(n);
         attrs.insert(std::make_pair(CKA_MODULUS, attribute_t(CKA_MODULUS, buf.get(), size)));
         attrs.insert(create_object(CKA_MODULUS_BITS,   size * 8));            
         
-        std::tie(size, buf) = read_bignum(pkey->pkey.rsa->e);
+        std::tie(size, buf) = read_bignum(e);
         attrs.insert(std::make_pair(CKA_PUBLIC_EXPONENT, attribute_t(CKA_PUBLIC_EXPONENT, buf.get(), size)));
 
         EVP_PKEY_free(pkey);
@@ -189,14 +194,18 @@ Attributes private_key_t::operator()(descriptor_p desc, const Attributes& attrib
     if (EVP_PKEY *pkey = PEM_read_PrivateKey(desc->file.get(), NULL, NULL, const_cast<char*>(""))) {
         int size = 0;
         std::shared_ptr<unsigned char> buf;
+        RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+        const BIGNUM *n = NULL, *e = NULL;
+
+        RSA_get0_key(rsa, &n, &e, NULL);
         
-        std::tie(size, buf) = read_bignum(pkey->pkey.rsa->n);
+        std::tie(size, buf) = read_bignum(n);
         attrs.insert(std::make_pair(CKA_MODULUS, attribute_t(CKA_MODULUS, buf.get(), size)));
         
-        std::tie(size, buf) = read_bignum(pkey->pkey.rsa->e);
+        std::tie(size, buf) = read_bignum(e);
         attrs.insert(std::make_pair(CKA_PUBLIC_EXPONENT, attribute_t(CKA_PUBLIC_EXPONENT, buf.get(), size)));
 
-        switch (EVP_PKEY_type(pkey->type)) {
+        switch (EVP_PKEY_base_id(pkey)) {
             case EVP_PKEY_RSA:
                 attrs[CKA_KEY_TYPE] = attribute_t(CKA_KEY_TYPE, (CK_KEY_TYPE)CKK_RSA);
                 break;

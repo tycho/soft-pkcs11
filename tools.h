@@ -13,7 +13,7 @@ void st_logf(const char *fmt, va_list args);
 void print_attributes(const CK_ATTRIBUTE *attributes, CK_ULONG num_attributes);
 void print_attributes(const Attributes& attributes); 
 
-std::pair<int, std::shared_ptr<unsigned char>> read_bignum(void* ssl_bignum);
+std::pair<int, std::shared_ptr<unsigned char>> read_bignum(const void* ssl_bignum);
 
 template <typename T>
 inline std::pair<CK_ATTRIBUTE_TYPE, attribute_t> create_object(CK_ATTRIBUTE_TYPE type, const T& object) {

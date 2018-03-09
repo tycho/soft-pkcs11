@@ -494,10 +494,10 @@ std::vector<unsigned char> soft_token_t::sign(CK_OBJECT_HANDLE id, CK_MECHANISM_
     
     
     if (EVP_PKEY *pkey = PEM_read_PrivateKey(file.get(), NULL, ask_password_cb, NULL)) {
-        if (pkey->pkey.rsa == NULL) {
+        if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA) {
             throw pkcs11_exception_t(CKR_FUNCTION_FAILED, "Can't read private key");
         }
-        std::vector<unsigned char> buffer(RSA_size(pkey->pkey.rsa));
+        std::vector<unsigned char> buffer(RSA_size(EVP_PKEY_get0_RSA(pkey)));
         int padding, padding_len;
         
         switch(type) {
@@ -518,7 +518,7 @@ std::vector<unsigned char> soft_token_t::sign(CK_OBJECT_HANDLE id, CK_MECHANISM_
             throw pkcs11_exception_t(CKR_ARGUMENTS_BAD, "Data is empty");
         }
 
-        auto len = RSA_private_encrypt(ulDataLen, pData, buffer.data(), pkey->pkey.rsa, padding);
+        auto len = RSA_private_encrypt(ulDataLen, pData, buffer.data(), EVP_PKEY_get0_RSA(pkey), padding);
         
         LOG("private encrypt done\n");
         if (len <= 0) {
@@ -560,15 +560,9 @@ std::vector<unsigned char> soft_token_t::create_key(CK_OBJECT_CLASS klass, const
     std::unique_ptr<BIGNUM, void(*)(BIGNUM*)> priv_e2 = parse_bignum(CKA_EXPONENT_2, attrs);
     std::unique_ptr<BIGNUM, void(*)(BIGNUM*)> priv_c = parse_bignum(CKA_COEFFICIENT, attrs);
     
-    pubkey->e = expon.release();
-    pubkey->n = modul.release();
-    
-    pubkey->d = priv_expon.release();
-    pubkey->p = priv_p1.release();
-    pubkey->q = priv_p2.release();
-    pubkey->dmp1 = priv_e1.release();
-    pubkey->dmq1 = priv_e2.release();
-    pubkey->iqmp = priv_c.release();
+    RSA_set0_key(pubkey.get(), modul.release(), expon.release(), priv_expon.release());
+    RSA_set0_factors(pubkey.get(), priv_p1.release(), priv_p2.release());
+    RSA_set0_crt_params(pubkey.get(), priv_e1.release(), priv_e2.release(), priv_c.release());
     
     std::shared_ptr<EVP_PKEY> pRsaKey(
         EVP_PKEY_new(),
@@ -656,7 +650,7 @@ void soft_token_t::reset()
         auto public_range = p_->objects
             | filtered(by_attrs({create_object(CKA_CLASS, public_key_c)}))
 //                 | filtered(by_attrs({create_object(AttrSshPublic, bool_true)}))
-            | filtered([&private_key] (const Objects::value_type& pub_key) mutable {
+            | filtered([&private_key] (const Objects::value_type& pub_key) {
                 return is_equal(CKA_MODULUS, pub_key, private_key)
                     || pub_key.second.at(CKA_LABEL).to_string() == (private_key.second.at(CKA_LABEL).to_string() + ".pub");
             });
