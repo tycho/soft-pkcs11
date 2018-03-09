@@ -34,7 +34,7 @@
 #define ASSERT_NOT_PTR(ptr)\
     if (ptr != NULL_PTR) throw pkcs11_exception_t(CKR_ARGUMENTS_BAD, "Pointer " #ptr " must present.");
 
-std::auto_ptr<soft_token_t> soft_token;
+std::shared_ptr<soft_token_t> soft_token;
 
 template <int ID>
 struct func_t {

@@ -58,7 +58,7 @@ private:
     void reset();
   
     struct Pimpl;
-    std::auto_ptr<Pimpl> p_;
+    std::shared_ptr<Pimpl> p_;
 };
 
 
