@@ -112,10 +112,16 @@ private:
 CK_SESSION_HANDLE session_t::_id = 0;
 std::list<session_t> session_t::_sessions = std::list<session_t>();
 
+#ifdef __GNUC__
+#define DLLEXPORT __attribute__((visibility("default")))
+#endif
+#ifndef DLLEXPORT
+#define DLLEXPORT
+#endif
 
 extern "C" {
   
-CK_RV C_Initialize(CK_VOID_PTR a)
+DLLEXPORT CK_RV C_Initialize(CK_VOID_PTR a)
 {
     LOG_G("%s",__FUNCTION__);
     
@@ -139,7 +145,7 @@ CK_RV C_Initialize(CK_VOID_PTR a)
     return CKR_OK;
 }
 
-CK_RV C_Finalize(CK_VOID_PTR a)
+DLLEXPORT CK_RV C_Finalize(CK_VOID_PTR a)
 {
     LOG_G("%s",__FUNCTION__);
     ASSERT_NOT_PTR(a);
@@ -162,7 +168,7 @@ static void snprintf_fill(char *str, size_t size, char fillchar, const char *fmt
   str[len++] = fillchar;
 }
 
-CK_RV C_GetInfo(CK_INFO_PTR info)
+DLLEXPORT CK_RV C_GetInfo(CK_INFO_PTR info)
 {
     LOG_G("%s",__FUNCTION__);
     ASSERT_PTR(info);
@@ -185,7 +191,7 @@ CK_RV C_GetInfo(CK_INFO_PTR info)
     return CKR_OK;
 }
 
-CK_RV C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PTR pulCount)
+DLLEXPORT CK_RV C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PTR pulCount)
 {
     LOG_G("%s",__FUNCTION__);
     
@@ -210,7 +216,7 @@ CK_RV C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PT
     return CKR_OK;
 }
 
-CK_RV C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
+DLLEXPORT CK_RV C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
 {
     LOG_G("%s",__FUNCTION__);
     ASSERT_PTR(pInfo);
@@ -240,7 +246,7 @@ CK_RV C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
     return CKR_OK;
 }
 
-CK_RV C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
+DLLEXPORT CK_RV C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 {
     LOG_G("%s",__FUNCTION__);
     ASSERT_PTR(pInfo);
@@ -287,7 +293,7 @@ CK_RV C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
     return CKR_OK;
 }
 
-CK_RV C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMechanismList, CK_ULONG_PTR pulCount)
+DLLEXPORT CK_RV C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMechanismList, CK_ULONG_PTR pulCount)
 {
     LOG_G("%s",__FUNCTION__);
 
@@ -308,14 +314,14 @@ CK_RV C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMechanismList
     return CKR_OK;
 }
 
-CK_RV C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_MECHANISM_INFO_PTR pInfo)
+DLLEXPORT CK_RV C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_MECHANISM_INFO_PTR pInfo)
 {
     LOG_G("%s slot:%d type:%d", __FUNCTION__, slotID, type);
     
     return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
-CK_RV C_InitToken(CK_SLOT_ID slotID,
+DLLEXPORT CK_RV C_InitToken(CK_SLOT_ID slotID,
         CK_UTF8CHAR_PTR pPin,
         CK_ULONG ulPinLen,
         CK_UTF8CHAR_PTR pLabel)
@@ -324,7 +330,7 @@ CK_RV C_InitToken(CK_SLOT_ID slotID,
     return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
-CK_RV C_OpenSession(CK_SLOT_ID slotID,
+DLLEXPORT CK_RV C_OpenSession(CK_SLOT_ID slotID,
           CK_FLAGS flags,
           CK_VOID_PTR pApplication,
           CK_NOTIFY Notify,
@@ -341,7 +347,7 @@ CK_RV C_OpenSession(CK_SLOT_ID slotID,
     return CKR_OK;
 }
 
-CK_RV C_CloseSession(CK_SESSION_HANDLE hSession)
+DLLEXPORT CK_RV C_CloseSession(CK_SESSION_HANDLE hSession)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
     
@@ -354,7 +360,7 @@ CK_RV C_CloseSession(CK_SESSION_HANDLE hSession)
     return CKR_OK;
 }
 
-CK_RV C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR pInfo)
+DLLEXPORT CK_RV C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR pInfo)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
     ASSERT_PTR(pInfo);
@@ -386,7 +392,7 @@ const std::set<CK_ATTRIBUTE_TYPE> public_attributes = {
     CKA_ALWAYS_AUTHENTICATE, CKA_ID, CKA_WRAP, CKA_CERTIFICATE_TYPE
 };
 
-CK_RV C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
+DLLEXPORT CK_RV C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
     LOG_G("%s session:%d ulCount%d", __FUNCTION__, hSession, ulCount);
 
@@ -422,7 +428,7 @@ CK_RV C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, 
     return CKR_OK;
 }
 
-CK_RV C_FindObjects(CK_SESSION_HANDLE hSession,
+DLLEXPORT CK_RV C_FindObjects(CK_SESSION_HANDLE hSession,
           CK_OBJECT_HANDLE_PTR phObject,
           CK_ULONG ulMaxObjectCount,
           CK_ULONG_PTR pulObjectCount)
@@ -458,7 +464,7 @@ CK_RV C_FindObjects(CK_SESSION_HANDLE hSession,
     return CKR_OK;
 }
 
-CK_RV C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
+DLLEXPORT CK_RV C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
 {
     LOG("F1 %d", hSession);
     LOG("F2 %d", hSession);
@@ -483,7 +489,7 @@ CK_RV C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
     return CKR_OK;
 }
 
-CK_RV C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
+DLLEXPORT CK_RV C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
     LOG_G("%s session:%d handle:%lu %s ulCount:%d", __FUNCTION__, hSession, hObject, soft_token->attributes(hObject)[CKA_LABEL].to_string().c_str(), ulCount);
     
@@ -537,7 +543,7 @@ CK_RV C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject, 
     return CKR_OK;
 }
 
-CK_RV C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_UTF8CHAR_PTR pPin, CK_ULONG ulPinLen)
+DLLEXPORT CK_RV C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_UTF8CHAR_PTR pPin, CK_ULONG ulPinLen)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
     
@@ -565,7 +571,7 @@ CK_RV C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_UTF8CHAR_PTR
     }
 }
 
-CK_RV C_Logout(CK_SESSION_HANDLE hSession)
+DLLEXPORT CK_RV C_Logout(CK_SESSION_HANDLE hSession)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
     
@@ -579,7 +585,7 @@ CK_RV C_Logout(CK_SESSION_HANDLE hSession)
     return CKR_OK;    
 }
 
-CK_RV C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
+DLLEXPORT CK_RV C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
 
@@ -605,7 +611,7 @@ CK_RV C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJ
     return CKR_OK;
 }
 
-CK_RV C_Sign(CK_SESSION_HANDLE hSession,
+DLLEXPORT CK_RV C_Sign(CK_SESSION_HANDLE hSession,
        CK_BYTE_PTR pData,
        CK_ULONG ulDataLen,
        CK_BYTE_PTR pSignature,
@@ -638,7 +644,7 @@ CK_RV C_Sign(CK_SESSION_HANDLE hSession,
 }
 
 
-CK_RV C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen)
+DLLEXPORT CK_RV C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
 
@@ -650,7 +656,7 @@ CK_RV C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPar
     return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
-CK_RV C_SignFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature, CK_ULONG_PTR pulSignatureLen)
+DLLEXPORT CK_RV C_SignFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature, CK_ULONG_PTR pulSignatureLen)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
 
@@ -662,7 +668,7 @@ CK_RV C_SignFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature, CK_ULONG_P
     return CKR_OK;
 }
 
-CK_RV C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CK_OBJECT_HANDLE_PTR phObject)
+DLLEXPORT CK_RV C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CK_OBJECT_HANDLE_PTR phObject)
 {
     LOG_G("%s session:%d", __FUNCTION__, hSession);
     
@@ -723,14 +729,14 @@ CK_RV C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_
     return CKR_OK;
 }
 
-CK_RV C_InitPIN(CK_SESSION_HANDLE hSession, CK_UTF8CHAR_PTR pPin, CK_ULONG ulPinLen)
+DLLEXPORT CK_RV C_InitPIN(CK_SESSION_HANDLE hSession, CK_UTF8CHAR_PTR pPin, CK_ULONG ulPinLen)
 {
     return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
 extern CK_FUNCTION_LIST funcs;
 
-CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
+DLLEXPORT CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 {
     LOG_G("%s",__FUNCTION__);
     *ppFunctionList = &funcs;
@@ -738,7 +744,7 @@ CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 }
 
 
-CK_FUNCTION_LIST funcs = {
+DLLEXPORT CK_FUNCTION_LIST funcs = {
     { 2, 11 },
     WRAP_FUNCTION(CK_C_Initialize, exception_handler),
     WRAP_FUNCTION(CK_C_Finalize, exception_handler),
