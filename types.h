@@ -2,6 +2,7 @@
 #ifndef ST_TYPES_H
 #define ST_TYPES_H
 
+#include <functional>
 #include <string>
 #include <memory>
 #include <vector>
